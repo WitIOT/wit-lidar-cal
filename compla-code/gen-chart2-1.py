@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import json
 
-def plot_lidar_data(data,oc_cal, oc_dis):
-        # กรองข้อมูล Actual Data ให้เหลือเฉพาะค่าที่ Distance >= 1000
+def plot_lidar_data(data, oc_cal, oc_dis):
+    # กรองข้อมูล Actual Data ให้เหลือเฉพาะค่าที่ Distance >= 1000
     filtered_data = data[data['Distance (m)'] >= 1000].copy()
 
     # เลื่อนข้อมูลให้จุดต่ำสุดของ Distance กลายเป็น 0
@@ -13,17 +13,30 @@ def plot_lidar_data(data,oc_cal, oc_dis):
         min_distance = filtered_data['Distance (m)'].min()
         filtered_data['Distance (m)'] = filtered_data['Distance (m)'] - min_distance
 
-    
-    plt.figure(figsize=(10, 6))
-    # plt.scatter(data['Digitizer Signal (v * m²)'], data['Distance (m)'], color='red', label="Distance vs Digitizer Signal", alpha=0.7)
-    plt.plot(filtered_data['Digitizer Signal (v * m²)'], filtered_data['Distance (m)'], color='blue', linewidth=2, label="Actual Data")
-    plt.plot(oc_cal, oc_dis, color='green', linewidth=2, label="Corrected Data")
+    # สร้างกราฟหลัก
+    fig, ax1 = plt.subplots(figsize=(10, 6))
 
-    plt.title("LIDAR Signal Analyzer - Combined Data", fontsize=14)
-    plt.xlabel("Digitizer Signal (v * m²)", fontsize=12)
-    plt.ylabel("Distance (m)", fontsize=12)
+    # Corrected Data (แกนล่าง)
+    ax1.plot(oc_cal, oc_dis, color='green', linewidth=2, label="Corrected Data")
+    ax1.set_xlabel("Digitizer Signal (v * m²) - Corrected Data", fontsize=12, color='green')
+    ax1.set_ylabel("Distance (m)", fontsize=12)
+    ax1.tick_params(axis='x', labelcolor='green')
+
+    # เพิ่มแกน X ด้านบนสำหรับ Actual Data
+    ax2 = ax1.twiny()
+    ax2.plot(filtered_data['Digitizer Signal (v * m²)'], filtered_data['Distance (m)'],
+             color='blue', linewidth=2, label="Actual Data")
+    ax2.set_xlabel("Digitizer Signal (v * m²) - Actual Data", fontsize=12, color='blue')
+    ax2.tick_params(axis='x', labelcolor='blue')
+
+    # เพิ่ม title และ legend
+    fig.suptitle("LIDAR Signal Analyzer - Combined Data", fontsize=14)
+    ax1.legend(loc='upper left', bbox_to_anchor=(0, 1.15))
+    ax2.legend(loc='upper right', bbox_to_anchor=(1, 1.15))
+
     plt.grid(True)
-    plt.legend()
+    plt.show()
+
     plt.show()
 
 def filter_outliers(data):
