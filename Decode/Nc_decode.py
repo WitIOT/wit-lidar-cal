@@ -2,7 +2,7 @@ import xarray as xr
 import pandas as pd
 import os
 
-input_file = 'example-data/MPL_5038_202404032020.nc'
+input_file = 'example-data/MPL_5038_202411281225.nc'
 
 # กำหนดโฟลเดอร์สำหรับ export
 export_folder = 'Export/'
