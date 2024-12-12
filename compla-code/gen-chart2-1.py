@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import json
 
-def plot_lidar_data(data, oc_cal, oc_dis):
+def plot_lidar_data(data, oc_cal, oc_dis,folder_path):
     # กรองข้อมูล Actual Data ให้เหลือเฉพาะค่าที่ Distance >= 1000
     filtered_data = data[data['Distance (m)'] >= 1000].copy()
 
@@ -17,26 +17,47 @@ def plot_lidar_data(data, oc_cal, oc_dis):
     fig, ax1 = plt.subplots(figsize=(10, 6))
 
     # Corrected Data (แกนล่าง)
-    ax1.plot(oc_cal, oc_dis, color='green', linewidth=2, label="Corrected Data")
-    ax1.set_xlabel("Digitizer Signal (v * m²) - Corrected Data", fontsize=12, color='green')
+    ax1.plot(oc_cal, oc_dis, color='green', linewidth=2, label="old software")
+    ax1.set_xlabel("Digitizer Signal (v * m²)", fontsize=12, color='green')
     ax1.set_ylabel("Distance (m)", fontsize=12)
     ax1.tick_params(axis='x', labelcolor='green')
 
     # เพิ่มแกน X ด้านบนสำหรับ Actual Data
     ax2 = ax1.twiny()
-    ax2.plot(filtered_data['Digitizer Signal (v * m²)'], filtered_data['Distance (m)'],
-             color='blue', linewidth=2, label="Actual Data")
-    ax2.set_xlabel("Digitizer Signal (v * m²) - Actual Data", fontsize=12, color='blue')
+    ax2.plot(filtered_data['Digitizer Signal (v * m²)'], filtered_data['Distance (m)'],label="new software")
+    # ax2.set_xlabel("Digitizer Signal (v * m²)", fontsize=12, color='blue')
     ax2.tick_params(axis='x', labelcolor='blue')
 
-    # เพิ่ม title และ legend
-    fig.suptitle("LIDAR Signal Analyzer - Combined Data", fontsize=14)
-    ax1.legend(loc='upper left', bbox_to_anchor=(0, 1.15))
-    ax2.legend(loc='upper right', bbox_to_anchor=(1, 1.15))
+    # แปลงชื่อ folder ให้เป็นรูปแบบวันที่ เวลา
+    folder_name = os.path.basename(folder_path)
+    parts = folder_name.split('-')
+    # parts = ['csv', '03', '04', '2024', 'tmp4', '20', '00']
+    day = parts[1]
+    month = parts[2]
+    year = parts[3]
+    hour = parts[5]
+    minute = parts[6]
 
-    plt.grid(True)
-    plt.show()
+    # สร้างสตริงวันเวลา
+    date_str = f"{day}/{month}/{year} {hour}:{minute}"
 
+    # ตั้ง title: บรรทัดแรกเป็น "LIDAR Signal Analyzer" บรรทัดที่สองเป็นวันเวลา
+    chart_title = f"LIDAR Signal Analyzer {date_str}"
+    fig.suptitle(chart_title, fontsize=14, fontweight='bold')
+    # ดึง handle และ label จากทั้งสองแกนมาเพื่อทำ legend ร่วม
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+
+    # รวม handle และ label ของทั้งสองแกน
+    lines = lines1 + lines2
+    labels = labels1 + labels2
+
+    # สร้าง legend เดียวที่รวมทั้ง Actual และ Corrected Data
+    # loc='upper right' คือให้ legend อยู่มุมขวาบนของแกน
+    # bbox_to_anchor=(1, 1) ช่วยปรับให้ legend อยู่ภายในกรอบของ plot
+    ax1.legend(lines, labels, loc='upper right', bbox_to_anchor=(1, 1))
+
+    # plt.grid(True)
     plt.show()
 
 def filter_outliers(data):
@@ -99,7 +120,7 @@ def main():
         try:
             data = process_files(folder_path)
             if not data.empty:
-                plot_lidar_data(data, oc_cal, oc_dis)
+                plot_lidar_data(data, oc_cal, oc_dis,folder_path)
             else:
                 print("No valid data to plot.")
         except Exception as e:
