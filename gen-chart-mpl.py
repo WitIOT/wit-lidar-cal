@@ -22,12 +22,16 @@ def plot_chart():
     try:
         x_column = x_var.get()
         y_column = y_var.get()
+        y_new = y_var.get() * 1000
         if x_column and y_column:
             plt.figure(figsize=(10, 6))
-            plt.plot(df[x_column], df[y_column], marker='o')
+            # plt.plot(copol_nrb_new, range_nrb_new, color='tab:orange', label='LiDAR MPL Signal (copol_nrb & range_nrb.1)', alpha=0.8)
+            plt.plot(df[x_column], df[y_column], color='tab:orange', alpha=0.8)
+            # plt.plot(df[x_column], df[y_new], color='tab:orange', alpha=0.8)
             plt.title(f'{y_column} vs {x_column}', fontsize=14)
-            plt.xlabel(x_column, fontsize=12)
-            plt.ylabel(y_column, fontsize=12)
+            plt.xlabel("Digitizer Signal [v * m²] (" + x_column + ")", fontsize=12)
+            plt.ylabel("Distance [km] ( y_column)", fontsize=12)
+            # plt.ylabel("Distance [m] (" + y_column + ")", fontsize=12)
             plt.grid(True)
             plt.show()
         else:
